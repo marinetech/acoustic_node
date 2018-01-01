@@ -1,0 +1,12 @@
+# on the pc104 create user pi
+adduser "pi" with passwd "raspberry"
+
+
+# installation on rpi
+sudo pip3 install paramiko
+sudo apt-get install openssh-server
+
+
+classes to create:
+LOG
+GPIO
