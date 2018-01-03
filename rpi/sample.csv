@@ -1,0 +1,6 @@
+command_name,Threshold [1-4095],gain,Level [0-3],signal_files [tx] [seperated by ;],number_of_loops [tx],ref_file [rx],Fs [rx],WinLen [rx],sleep_time [sec]
+config,1,0,3,,,,,,
+tx,,,,AUVDetect,2,,,,5
+config,1,0,3,,,,,,
+ref,,,,AUVDetectRef,,,,,
+rx,,,,,,,250000,5,

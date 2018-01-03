@@ -1,0 +1,30 @@
+{
+  "task": [
+    {
+      "cmd": "config",
+      "threshold": 1,
+      "gain": 0,
+      "level": 3
+    },
+    {
+      "cmd": "tx",
+      "signal": "AUVDetect",
+      "loop": 2,
+      "sleep": 8
+    },
+    {
+      "cmd": "config",
+      "threshold": 1,
+      "gain": 0,
+      "level": 3
+    },
+    {
+      "cmd": "rx",
+      "ref": "AUVDetectRef",
+      "Fs": 250000,
+      "WinLen": 5,
+      "loop": 10,
+      "rxFile": "rxFile"
+    }
+  ]
+}
