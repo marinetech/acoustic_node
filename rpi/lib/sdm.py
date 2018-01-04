@@ -6,12 +6,14 @@ import os.path
 import time
 
 class SDM:
-    def __init__(self, ip, port, tasks_dir, log):
+    def __init__(self, ip, port, tasks_dir, bin_dir ,log):
         self.ip = ip
         self.modemId = ip.split(".")[3]
         self.port = port
         self.tasks_dir = tasks_dir
+        self.bin_dir = bin_dir
         self.log = log
+        self.log.print_log("-I- SDM obj was Initialized successfully")
 
     def reset(self):
         sock = socket.create_connection((self.ip, 9200), 2)
@@ -21,20 +23,21 @@ class SDM:
               sock.recv(1024)
 
     def runCMD(self, cmd):
-        if cmd.startWith("sleep"):
+        if cmd.startswith("sleep"):
             seconds = int(cmd.split(";")[1])
-            print("sleeping")
+            print("sleep " + str(seconds))
             time.sleep(seconds)
             return
 
+        print(cmd)
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         with open('f.tmp','w') as w:
             w.write(cmd)
-            cmdSh = "./sdmsh " + self.modemId + " -f f.tmp\n"
+            cmdSh = self.bin_dir + "/sdmsh " + self.modemId + " -f f.tmp\n"
             shell.stdin.write(cmdSh.encode('ascii'))
         shell.stdin.close()
-        for l in shell.stdout:
-            print(l)
+        # for l in shell.stdout:
+        #     print(l)
 
     def parse_config(self, subtask):
         # print("__parse_config: " + str(subtask))
@@ -63,7 +66,7 @@ class SDM:
 
         ret = []
         for i in range(subtask["loop"]):
-            ret.append("tx " + str(subtask["signal"]))
+            ret.append("tx " + self.tasks_dir + "/" + str(subtask["signal"]))
             if subtask["sleep"] > 0:
                 ret.append("sleep;" + str(subtask["sleep"]))
 
@@ -81,7 +84,7 @@ class SDM:
             return None
 
 
-        ret = ["ref " + subtask["ref"]]
+        ret = ["ref " + self.tasks_dir + "/" + subtask["ref"]]
         for i in range(subtask["loop"]):
             ret.append("rx " + str(subtask["Fs"] * subtask["WinLen"]) + " " + subtask["ref"] + "_rx" + str(i))
         return ret
@@ -111,5 +114,5 @@ class SDM:
 
 
 if  __name__ == "__main__":
-    sdm = SDM("192.168.0.149", '9200', '/home/ilan/projects/acoustic_node/rpi_tasks', None)
+    sdm = SDM("192.168.0.149", '9200', '/home/ilan/projects/acoustic_node/rpi_tasks', '/home/ilan/projects/acoustic_node/rpi/bin', None)
     sdm.process_tasks()

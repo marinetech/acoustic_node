@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 
 class CtrlGPIO:
 
-	def __init__(self):
+	def __init__(self, log):
 		# to use Raspberry Pi board pin numbers
 		GPIO.setmode(GPIO.BCM)
 		# disable 'channel is already in use' warnings
@@ -21,17 +21,29 @@ class CtrlGPIO:
 		GPIO.setup(9, GPIO.OUT)
 		GPIO.output(self.notinuse_io, GPIO.HIGH)
 
+		self.log = log
+		self.log.print_log("-I- GPIO obj was Initialized successfully")
+
+	# rpi is on, all the rest is off.
+	# used when rpi has no need to cmmunicate with pc104 or with modem
 	def set_process_mode(self):
+		self.log.print_log("-I- GPIO: setting process mode")
 		GPIO.output(self.dsl_io, GPIO.HIGH)
 		GPIO.output(self.modem_io, GPIO.HIGH)
 		GPIO.output(self.battery_io, GPIO.HIGH)
 
+	# rpi, battery, dsl are on, modem is off
+	# used when rpi has to communicate with pc104
 	def set_comm_mode(self):
+		self.log.print_log("-I- GPIO: setting communication mode")
 		GPIO.output(self.battery_io, GPIO.LOW)
 		GPIO.output(self.dsl_io, GPIO.LOW)
 		GPIO.output(self.modem_io, GPIO.HIGH)
 
+	# rpi, battery, modem are on, dsl is off
+	# used when rpi has to communicate with modem
 	def set_operation_mode(self):
+		self.log.print_log("-I- GPIO: setting operation mode")
 		GPIO.output(self.battery_io, GPIO.LOW)
 		GPIO.output(self.dsl_io, GPIO.HIGH)
 		GPIO.output(self.modem_io, GPIO.LOW)
