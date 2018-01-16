@@ -65,7 +65,6 @@ if  __name__ == "__main__":
     except Exception as e:
         self.log.print_log(e)
         exit(1)
-    #net.connect_func('127.0.0.1','pi','raspberry')
-    net.connect_func('127.0.0.1','ilan','aer4!13a')
+    net.connect_func('127.0.0.1','pi','raspberry')    
     # net.ssh_get('/home/ilan/projects/acoustic_node/pc104_tasks', '/home/ilan/projects/acoustic_node/pc104_done/')
     net.ssh_put('/home/ilan/projects/acoustic_node/pc104_tasks', '/home/ilan/projects/acoustic_node/pc104_done/')
