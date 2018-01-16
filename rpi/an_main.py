@@ -16,15 +16,14 @@ if  __name__ == "__main__":
         gpio = CtrlGPIO(log)
         sdm = SDM(modem_ip, modem_port, rpi_tasks, rpi_bin, log)
     except Exception as e:
-        log.print_log("-E- " + str(e))
+        print("-E- " + str(e))
         exit(1)
 
 
-    log.print_log("")
-    # establish ssh connection with pc104
-    net.connect_func(pc104_ip,pc104_user,pc104_user_passwd)
-    # get new tasks
-    net.get_func(pc104_tasks , rpi_tasks)
-
-    sdm.process_tasks()
-    # net.put_func(rpi_done_folder, pc104_done_folder)
+    gpio.set_comm_mode() # pwr-on rpi + dsl
+    net.connect_func(pc104_ip,pc104_user,pc104_user_passwd) # establish ssh connection with pc104
+    net.get_func(pc104_tasks , rpi_tasks) # get new tasks
+    gpio.set_operation_mode # pwr-on rpi + modem
+    sdm.process_tasks() # run SDM tasks
+    gpio.set_comm_mode() # pwr-on rpi + dsl
+    net.put_func(rpi_done_folder, pc104_done_folder) # upload results

@@ -34,13 +34,14 @@ class Network:
         #     self.log.print_log('... ' + line.strip('\n'))
 
 
+    # all files under remote_dir will be copied to local_dir (remote folders will be ignored)
     def ssh_get(self, remote_dir, local_dir):
         try:
             sftp = self.ssh.open_sftp()
             self.log.print_log("-I- pulling new tasks from: " + remote_dir)
             for attr in sftp.listdir_attr(remote_dir):
                 if not stat.S_ISDIR(attr.st_mode): #if not directory
-                    self.log.print_log(attr.filename)
+                    self.log.print_log("    -- " + attr.filename)
                     sftp.get(remote_dir + "/" + attr.filename, local_dir + "/" + attr.filename)
             sftp.close()
         except  Exception as e:
@@ -48,7 +49,7 @@ class Network:
             self.log.print_log(str(e))
             exit(2)
 
-
+    # all files under local_dir will be copied to remote_dir (local folders will be ignored)
     def ssh_put(self, remote_dir, local_dir):
         sftp = self.ssh.open_sftp()
         for f in os.listdir(local_dir):
