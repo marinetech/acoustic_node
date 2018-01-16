@@ -30,10 +30,11 @@ class SDM:
             return
 
         print(cmd)
+        temp_file = self.bin_dir + "/f.tmp"
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        with open('f.tmp','w') as w:
+        with open(temp_file,'w') as w:
             w.write(cmd)
-            cmdSh = self.bin_dir + "/sdmsh " + self.modemId + " -f f.tmp\n"
+            cmdSh = self.bin_dir + "/sdmsh " + self.modemId + " -f " + temp_file + "\n"
             shell.stdin.write(cmdSh.encode('ascii'))
         shell.stdin.close()
         # for l in shell.stdout:
