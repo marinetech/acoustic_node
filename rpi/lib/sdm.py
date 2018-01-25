@@ -13,7 +13,7 @@ class SDM:
         self.tasks_dir = tasks_dir
         self.bin_dir = bin_dir
         self.log = log
-        self.log.print_log("-I- SDM obj was Initialized successfully")
+        self.log.print_log("-I- SDM obj was Initialized successfully [id: " + self.modemId + "]")
 
     def reset(self):
         sock = socket.create_connection((self.ip, 9200), 2)
@@ -25,11 +25,11 @@ class SDM:
     def runCMD(self, cmd):
         if cmd.startswith("sleep"):
             seconds = int(cmd.split(";")[1])
-            print("sleep " + str(seconds))
+            self.log.print_log("    -- sleep: " + str(seconds))
             time.sleep(seconds)
             return
 
-        print(cmd)
+        print("     -- cmd: " + cmd)
         temp_file = self.bin_dir + "/f.tmp"
         shell = subprocess.Popen(["sh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         with open(temp_file,'w') as w:
@@ -91,6 +91,7 @@ class SDM:
         return ret
 
     def process_tasks(self):
+        self.log.print_log("-I- processing tasks")
         for task in glob.glob(self.tasks_dir + "/*.json"):
             # print(task)
             parsed_json = json.loads( open(task).read() )
@@ -99,11 +100,11 @@ class SDM:
                 try:
                     parse_func = getattr(self, "parse_" + subtask["cmd"])
                 except:
-                    print("-E- failed to parse %s - unknown cmd or cmd is missing" % (subtask)); exit(3)
+                    self.log.print_log("-E- failed to parse %s - unknown cmd or cmd is missing" % (subtask)); exit(3)
 
                 lines = parse_func(subtask)
                 if lines == None:
-                    print("-E- return val is None: %s" % (subtask)); exit(4)
+                    self.log.print_log("-E- return val is None: %s" % (subtask)); exit(4)
 
                 for line in lines:
                     subtasks.append(line)

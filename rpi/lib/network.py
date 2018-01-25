@@ -50,7 +50,7 @@ class Network:
             exit(2)
 
     # all files under local_dir will be copied to remote_dir (local folders will be ignored)
-    def ssh_put(self, remote_dir, local_dir):
+    def ssh_put(self, local_dir, remote_dir):
         sftp = self.ssh.open_sftp()
         for f in os.listdir(local_dir):
             if os.path.isfile(local_dir + "/" + f):

@@ -26,4 +26,4 @@ if  __name__ == "__main__":
     gpio.set_operation_mode # pwr-on rpi + modem
     sdm.process_tasks() # run SDM tasks
     gpio.set_comm_mode() # pwr-on rpi + dsl
-    net.put_func(rpi_done_folder, pc104_done_folder) # upload results
+    net.put_func(rpi_done, pc104_done) # upload results
