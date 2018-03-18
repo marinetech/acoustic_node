@@ -95,7 +95,7 @@ def normCorrSync(sig, refFFTUp, lRef, sigmaSqrRef, sigmaRef, short, useC):
     nCorrRef = sigmaSqrRef - sigmaRef * np.conjugate(sigmaRef) / lRef
     nCorr[0] = (sigmaXY[0] - sigmaRef * sigmaSig[0] * lRef) / (np.sqrt(nCorrSig * nCorrRef))
 
-    print(nCorrSig, nCorrRef, nCorr[0])
+    # print(nCorrSig, nCorrRef, nCorr[0])
     for ind in range(1,lSig):
         sigmaSqrSig[ind] = sigmaSqrSig[ind - 1] - sigPadded[ind - 1] * np.conjugate(sigPadded[ind - 1]) + sigPadded[lRef + (ind - 1)] * np.conjugate(sigPadded[lRef + (ind - 1)]);
         sigmaSig[ind] = sigmaSig[ind - 1] - sigPadded[ind - 1] + sigPadded[lRef + (ind - 1)]
@@ -112,6 +112,42 @@ def loadSignalFromFile(fname):
         print("-E- no such file: " + fname)
         return None
 
+    print()
     print("-I- processing " + fname)
     vec = np.fromfile(fname, sep=os.linesep)
     return vec
+
+
+def has_detection(mf_vector, thershold):
+    mf_vector_absolute = np.absolute(mf_vector)
+    mf_vector_after_thershold = np.where( mf_vector_absolute > thershold )
+    if mf_vector_after_thershold[0].size > 0:
+        return True
+    else:
+        return False
+
+
+def load_mat(fname):
+    if not os.path.isfile(fname):
+        print("load_mat: -E- no such file: " + fname)
+        return None
+
+    try:
+        matlab_ref = scipy.io.loadmat(fname)
+    except:
+        print("load_mat: -E- failed to load: " + fname)
+        return None
+
+    for key in ["Fc", "Fs", "Factor", "bLPF", "TxRef", "thershold"]:
+        if key not in matlab_ref:
+            print("load_mat: -E- missing parameter: " + key)
+            return None
+
+    return matlab_ref
+
+
+def pre_bb_norm(vec):
+    print(vec)
+    vec_abs = np.abs(vec)
+    vec_max = np.max(vec_abs)
+    return vec / vec_max
