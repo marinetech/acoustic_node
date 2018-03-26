@@ -1,0 +1,16 @@
+{
+  "config": "1 0 1",
+  "tx": "../tasks/OneSymbiosisSigHigh",
+  "times_to_repeat": 3,
+  "sleep_time": 0,
+  "modem": "136",
+  "sdmsh_cfg_file": "sdmsh/tx_loop.conf.sdmsh",
+  "sdmsh_cmd_file": "sdmsh/tx_loop.sdmsh",
+  "sdmsh_bin": "../bin//sdmsh",
+  "rx_sample_rate": 250000,
+  "rx_out_folder": "txrxpr_48_out",
+  "rx_winlen": 5,
+  "post": "basic_post_processing",
+  "matlab_ref": "../tasks/ParamForSigHigh.mat",
+  "detected_folder": "detected_48"
+}

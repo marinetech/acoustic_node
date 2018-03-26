@@ -1,0 +1,3 @@
+stop
+tx ../tasks/OneSymbiosisSigHigh
+rx 1250000 txrxpr_48_out/txrxpr_48_out2
