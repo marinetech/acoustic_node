@@ -73,9 +73,10 @@ class SDM:
 
         # if rx is required we must have a sample_rate
         if "rx_out_folder" in self.parsed_json:
-            for key in ["sample_rate", "winlen"]:
+            for key in ["rx_sample_rate", "rx_winlen"]:
                 if key not in self.parsed_json:
                     self.log.print_log("-E- Rx is required but no " + key + " was provided")
+                    exit(1)
 
 
         for dir in ["rx_out_folder", "detected_folder"]:
