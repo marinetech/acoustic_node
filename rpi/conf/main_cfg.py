@@ -5,8 +5,7 @@ now = datetime.datetime.now().strftime("%Y%m%d%H%M")
 net_protocol = "ssh"
 
 # pc104 related settings
-pc104_ip = "127.0.0.1" #testing env
-pc104_ip = "192.168.0.100"
+pc104_ip = "192.168.88.15"
 pc104_tasks = "/dmz/tasks"
 pc104_done = "/dmz/done"
 pc104_user = "pi"
@@ -24,5 +23,5 @@ log_path = rpi_logs + "/main_" + now + ".log"
 
 
 # modem related settings
-modem_ip = "192.168.0.149"
+modem_ip = "192.168.88.138"
 modem_port = "9200"

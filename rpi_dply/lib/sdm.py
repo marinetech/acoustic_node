@@ -11,12 +11,15 @@ import numpy as np
 import scipy.io
 from scipy import signal
 from shutil import copyfile
+sys.path.append("/home/pi/acoustic_node/lib")
 import matlab
 
+
 class SDM:
-    def __init__(self, tasks_dir, log):
+    def __init__(self, tasks_dir, done_dir, log):
         self.tasks_dir = tasks_dir
         self.log = log
+        self.done_dir = done_dir
         self.log.print_log("-I- SDM obj was Initialized successfully")
 
 
@@ -39,7 +42,7 @@ class SDM:
     def check_ping(self, modemIP):
         self.log.print_log("-I- verifying link to modem")
 
-        response = os.system("ping -c 1 " + modemIP + "  2>&1 >/dev/null")
+        response = os.system("ping -c 8 " + modemIP + "  2>&1 >/dev/null")
         if response == 0:
             return
         else:
@@ -172,32 +175,47 @@ class SDM:
 
         # Read & analyze Rx files
         RxSig = matlab.loadSignalFromFile(f)
+        # need to check that we didn't load an empty files
         if RxSig is None:
             exit(1)
+        self.log.print_log("-D- shape: " + str(RxSig.shape))
+        self.log.print_log("-I- start: pre_bb_norm")
         RxSig = matlab.pre_bb_norm(RxSig)
-        pre_bb_norm = self.parsed_json["rx_out_folder"] + "/" + basename + ".norm"
-        np.savetxt(pre_bb_norm, RxSig)
-
+        self.log.print_log("-I- done")
+        self.log.print_log("-I- start: convert2bb")
         RxSig_BB = matlab.convert2bb(RxSig, float(Fc), float(Fs), int(Factor), bLPF)
-        bb_real = self.parsed_json["rx_out_folder"] + "/" + basename + ".bb.real"
-        np.savetxt(bb_real, np.real(RxSig_BB))
-        bb_imag = self.parsed_json["rx_out_folder"] + "/" + basename + ".bb.imag"
-        np.savetxt(bb_imag, np.imag(RxSig_BB))
-
+        self.log.print_log("-I- done")
+        self.log.print_log("-I- start: normCorrC")
         mf = matlab.normCorrC(TxRef_BB, RxSig_BB)
-        after_mf =  self.parsed_json["rx_out_folder"] + "/" + basename + ".mf"
-        np.savetxt(after_mf, mf)
-
+        self.log.print_log("-I- done")
+        self.log.print_log("-I- start: absolute")
         mf_vector_absolute = np.absolute(mf)
-        mf_absolute = self.parsed_json["rx_out_folder"] + "/" + basename + ".mf.abs"
-        np.savetxt(mf_absolute, mf_vector_absolute)
+        self.log.print_log("-I- done")
 
         # if detection copy all processing stages to detected folder; from there it will be sent to mainland
-        if not matlab.has_detection(mf, thershold):
+        self.log.print_log("-I- start: absolute")
+        if matlab.has_detection(mf, thershold):
             self.log.print_log("-I- detected: " + f)
+
+            pre_bb_norm = self.parsed_json["rx_out_folder"] + "/" + basename + ".norm"
+            np.savetxt(pre_bb_norm, RxSig)
+
+            bb_real = self.parsed_json["rx_out_folder"] + "/" + basename + ".bb.real"
+            np.savetxt(bb_real, np.real(RxSig_BB))
+            bb_imag = self.parsed_json["rx_out_folder"] + "/" + basename + ".bb.imag"
+            np.savetxt(bb_imag, np.imag(RxSig_BB))
+
+            after_mf =  self.parsed_json["rx_out_folder"] + "/" + basename + ".mf"
+            np.savetxt(after_mf, mf)
+
+            mf_absolute = self.parsed_json["rx_out_folder"] + "/" + basename + ".mf.abs"
+            np.savetxt(mf_absolute, mf_vector_absolute)
+
             for src in [pre_bb_norm, bb_real, bb_imag, after_mf, mf_absolute]:
-                dst = self.parsed_json["detected_folder"] + "/" + os.path.basename(src)
-                copyfile(src,  dst)
+                #dst = self.parsed_json["detected_folder"] + "/" + os.path.basename(src)
+                copyfile(src,  self.done_dir + "/" + basename )
+        copyfile(f,  self.done_dir + "/" + basename )
+        self.log.print_log("-I- done")
 
 
     def process_tasks(self):
