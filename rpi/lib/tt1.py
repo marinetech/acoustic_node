@@ -41,6 +41,7 @@ CurrentCurrent = CurrentCurrent if CurrentCurrent > 0 else CurrentCurrent*-1
 
 ser.write(a2)
 r2 = binascii.hexlify(ser.read(25))
+print("-D- r0: " + str(r0))
 
 AH_low = int(r2[2:4]+r2[0:2],16)
 AH_high = int(r2[6:8]+r2[4:6],16)

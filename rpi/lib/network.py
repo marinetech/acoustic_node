@@ -24,7 +24,7 @@ class Network:
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.log.print_log("-I- ssh_connect: %s %s %s" % (ip, user, passwd))
         try:
-            self.ssh.connect(ip, username=user, password=passwd)
+            self.ssh.connect(ip, username=user, password=passwd, timeout=5000)
         except  Exception as e:
             self.log.print_log("-E- ssh connection failed")
             self.log.print_log(str(e))
@@ -55,6 +55,7 @@ class Network:
         for f in os.listdir(local_dir):
             if os.path.isfile(local_dir + "/" + f):
                 sftp.put(local_dir + "/" + f, remote_dir + "/" + f)
+                os.remove(local_dir + "/" + f)
         sftp.close()
 
 

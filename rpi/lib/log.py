@@ -1,4 +1,5 @@
 import datetime
+import sys
 
 class Log:
     def __init__(self, log_path):
@@ -16,6 +17,7 @@ class Log:
         log.close()
         if echo:
             print(msg)
+            sys.stdout.flush()
 
 
 if  __name__ == "__main__":

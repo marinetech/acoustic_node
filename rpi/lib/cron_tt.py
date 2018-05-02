@@ -4,7 +4,6 @@ import serial, time, array, binascii
 
 ser = serial.Serial()
 ser.port = "/dev/ttyUSB1"
-print("-D- trying to read " + ser.port)
 ser.baudrate = 38400
 ser.bytesize = serial.EIGHTBITS
 ser.parity = serial.PARITY_NONE
@@ -56,10 +55,25 @@ actual_ah=round(actual_ah,2)
 CurrentCurrent=round(CurrentCurrent,2)
 VoltVal=round(VoltVal,2)
 
-print ("Design Ampere hour : " + str(ah)+" AH")
-print ("Current            : " + str(CurrentCurrent)+" mA")
-print ("Volt               : " + str(VoltVal)+" v")
-print ("NEW Amp H          : " + str(actual_ah)+" AH")
-print ("NEW % capacity     : " + str(new_calc_prcnt) + "%")
-#print ("Amp /s : " + str(AH_low))
-#print ("% capacity : " + str(AH_high / ah) + "%")
+#### current time
+import time
+nice_time=time.strftime("%d/%b/%Y %l:%M%p")
+########## saving to file ###########
+with open("cron_log.csv" , 'a') as w1:
+	endline = '\r\n'
+
+#	head = 'Design Ampere hour,Current,Volt,Amp H,% capacity' + endline
+#	w1.write(head)
+	l = nice_time
+	l += ","
+	l += str(ah)+" AH"
+	l += ","
+	l += str(CurrentCurrent)+" mA"
+	l += ","
+	l += str(VoltVal)+" v"
+	l += ","
+	l += str(actual_ah)+" AH"
+	l += ","
+	l += str(new_calc_prcnt) + "%"
+	l += endline
+	w1.write(l)

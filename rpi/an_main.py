@@ -1,4 +1,4 @@
-# import datetime
+import datetime
 from lib.network import *
 from lib.log import *
 from lib.gpio import *
@@ -29,22 +29,31 @@ if  __name__ == "__main__":
 
 
 
-    #produce battery level log.
-    # gpio.set_all_on() # pwr-on rpi + dsl
-    # try:
-    #     log.print_log("-I- attempting to produce battery level")
-    #     import get_battery_level
-    # except Exception as e:
-    #     log.print_log("-E- faliled to read battery data")
-    #     log.print_log(e)
+    # produce battery level log.
+    try:
+        log.print_log("-I- attempting to produce battery level")
+        import get_battery_level
+        get_battery_level.execute(rpi_done, "/dev/ttyUSB1")
+    except Exception as e:
+        log.print_log("-E- Failed to read battery data")
+        log.print_log(str(e))
+
+    ### produce IMU log.
+    try:
+        log.print_log("-I- attempting to produce IMU info")
+        from lib.get_imu_info import *
+        imu_main(rpi_done)
+    except Exception as e:
+        log.print_log("-E- Failed to read imu data")
+        log.print_log(str(e))
 
     # execute the main cycle
     gpio.set_comm_mode() # pwr-on rpi + dsl
     net.connect_func(pc104_ip,pc104_user,pc104_user_passwd) # establish ssh connection with pc104
     net.get_func(pc104_tasks , rpi_tasks) # get new tasks
-    gpio.set_operation_mode() # pwr-on rpi + modem
-    sdm.process_tasks() # run SDM tasks
-    gpio.set_comm_mode() # pwr-on rpi + dsl
-    net.put_func(rpi_done, pc104_done) # upload results
-    gpio.set_process_mode() # rpi only
     gpio.set_all_on()
+    sdm.process_tasks() # run SDM tasks
+    gpio.set_comm_mode() # pwr-on rpi + dsl (turn-off modem)
+    net.put_func(rpi_done, pc104_done) # upload results
+    # gpio.set_process_mode() # rpi only
+    # gpio.set_all_on()

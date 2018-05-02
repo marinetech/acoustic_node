@@ -1,11 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import serial
 from struct import unpack, calcsize
 from datetime import datetime, timedelta
 import multiprocessing as mp
-import Queue
+import queue
 from sortedcontainers import SortedDict
 import json
+import os
+import sys
+current_dir = (os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(current_dir)
 from serial_helper import findSerialDevice
 import sys
 import math
@@ -247,6 +251,7 @@ class VectorNav(object):
         self._closePort()
 
     def _send(self, data):
+        data = str.encode(data)
         self._serial.write(data)
 
     def _recv(self, size):
@@ -270,9 +275,9 @@ class VectorNav(object):
 
     @staticmethod
     def _appendCRC(crc, data):
-        for c in data:
+        for c in data.decode('unicode_escape'):
             crc = ((crc >> 8) & 0xFF) | (crc << 8)
-            crc ^= ord(c) & 0xFF
+            crc ^= (ord(c) & 0xFF)
             crc ^= (crc & 0xFF) >> 4
             crc ^= crc << 12
             crc ^= (crc & 0xFF) << 5
@@ -295,6 +300,7 @@ class VectorNav(object):
             cmd += ',' + ','.join(str(p) for p in params)
 
         cmd = '$' + cmd + '*' + self._calcChecksum(cmd) + '\r\n'
+        # cmd = '$' + cmd + '*' + self._calcChecksum(cmd) + '\n'
 
         self._send(cmd)
 
@@ -322,10 +328,13 @@ class VectorNav(object):
             pass
 
     def _recvResponse(self):
+        # sync = self._recv(1).encode('utf-8').strip().decode()
         sync = self._recv(1)
 
         if len(sync) < 1:
             return None
+
+        sync = sync.decode('unicode_escape')
 
         if sync[0] == '$':
             line = str(self._recvLine())
@@ -335,6 +344,8 @@ class VectorNav(object):
 
         elif sync[0] == '\xFA':
             return self._parseBinaryResponse()
+
+
 
         return None
 
@@ -533,7 +544,7 @@ class VectorNav(object):
             return VectorNav.View(self, maxTime)
         except:
             #log.log('Error getting VectorNav view for timestamp {time}'.format(time=timestamp))
-            print 'Error getting VectorNav view for timestamp {time}'.format(time=timestamp)
+            print ('Error getting VectorNav view for timestamp {time}'.format(time=timestamp))
             return None
 
     class View(object):
@@ -678,26 +689,48 @@ class VectorNav(object):
             return json.dumps(self.dict)
 
 
-def main():
-    if len(sys.argv) < 2:
-        print 'Usage: python vectornav.py <sync|async> [com-port] [baud-rate]'
-        return
+def imu_main(log_dir):
+    # if len(sys.argv) < 5:
+    #     print('Usage: ')
+    #     print(os.path.basename(__file__) + '<sync|async> <seconds_between_samples> <number_of_samples_each_file> <number_of_files> [com-port] [baud-rate]')
+    #     print('Example: ' + os.path.basename(__file__) + ' sync 1 1 1')
+    #     return
+    print("-D------ " + log_dir)
 
     port = None
     baud = VectorNav.DEFAULT_BAUD
 
-    if len(sys.argv) > 2:
-        port = sys.argv[2]
+    # mode_str = sys.argv[1]
+    # seconds_between_samples = float(sys.argv[2])
+    # number_of_samples_each_file = int(sys.argv[3])
+    # number_of_files = int(sys.argv[4])
 
-    if len(sys.argv) > 3:
-        baud = int(sys.argv[3])
+    mode_str = "sync"
+    seconds_between_samples = 1
+    number_of_samples_each_file = 1
+    number_of_files = 1
 
-    mode_str = sys.argv[1]
+    current_file_cnt=0
+
+    if len(sys.argv) > 5:
+        port = sys.argv[5]
+
+    if len(sys.argv) > 6:
+        baud = int(sys.argv[6])
+
 
     #--------------------------------
-    seconds_between_samples = 1
-    number_of_samples_each_file=1000
-    log_file_location="vnav_logs"
+    # seconds_between_samples=1
+    # number_of_samples_each_file=1000
+    # number_of_files=3
+
+    log_file_location=log_dir #Yes, this is a redunedent assignment - need to align with the rest of the code
+    if not (os.path.isdir(log_file_location)):
+        try:
+            os.makedirs(log_file_location)
+        except:
+            print("-E- failed to create dir: " + log_file_location)
+            exit(1)
     log_file_name=''
     display2screen = True
     write2csv = True
@@ -708,7 +741,7 @@ def main():
         vn = VectorNav.create()
 
     if mode_str != 'sync' and mode_str != 'async':
-        print 'Unknown mode "%s"' % mode_str
+        print('Unknown mode "%s"' % mode_str)
         return
 
     mode = VectorNav.MODE_ASYNC if mode_str == 'async' else VectorNav.MODE_SYNC
@@ -739,8 +772,12 @@ def main():
 
             #-------------
             if(current_sample_id == 0):
+                if(current_file_cnt>=number_of_files):
+                    break
+                else :
+                    current_file_cnt+=1
                 dt = datetime.today()
-                log_file_name=log_file_location+"/samples_"+dt.strftime("%Y_%m_%d_%H%M%S")+".csv";
+                log_file_name=log_file_location+"/imu_"+dt.strftime("%Y_%m_%d_%H%M%S")+".log";
 
             # ----------------------------------------
             #             need to get the accelaration data
@@ -750,25 +787,25 @@ def main():
             if(display2screen):
                 # print 'Pos:', vn.position, 'Vel:', vn.velocity, 'YPR:', vn.YPR, 'Time:', vn.timeUTC, 'Sats:', vn.numSats
                 #print 'YPR:', vn.YPR, 'Time:', vn.timeUTC
-                print 'velocity:', view.velocity
+                print('velocity:', view.velocity)
                 # print 'Time:', view.timeUTC
-                print 'YPR:', view.YPR
-                print 'IMU:', view.IMU
-                print 'UncompAccel:', view.UncompAccel # Uncompensated acceleration measurement.
-                print 'UncompMag:', view.UncompMag     #Uncompensated magnetic measurement
-                print 'UncompGyro:', view.UncompGyro   # Uncompensated angular rate measurement
-                print 'Temp:', view.Temp
-                print 'Pres:', view.Pres   #  Pressure measurement
-                print 'DeltaTheta:', view.DeltaTheta
-                print 'DeltaV:', view.DeltaV
-                print 'Accel:', view.Accel # Compensated acceleration measurement.
-                print 'Mag:', view.Mag     # Compensated  magnetic measurement
-                print 'Gyro:', view.AngularRate   # Compensated angular rate measurement
-                print 'MagNed:', view.MagNed   # Compensated magnetic (NED)
+                print('YPR:', view.YPR)
+                print('IMU:', view.IMU)
+                print('UncompAccel:', view.UncompAccel) # Uncompensated acceleration measurement.
+                print('UncompMag:', view.UncompMag)     #Uncompensated magnetic measurement
+                print('UncompGyro:', view.UncompGyro)   # Uncompensated angular rate measurement
+                print('Temp:', view.Temp)
+                print('Pres:', view.Pres)   #  Pressure measurement
+                print('DeltaTheta:', view.DeltaTheta)
+                print('DeltaV:', view.DeltaV)
+                print('Accel:', view.Accel) # Compensated acceleration measurement.
+                print('Mag:', view.Mag)     # Compensated  magnetic measurement
+                print('Gyro:', view.AngularRate)   # Compensated angular rate measurement
+                print('MagNed:', view.MagNed)   # Compensated magnetic (NED)
 
 
-                print 'Pos:', view.position, 'Sats:', view.numSats
-                print "----------------"
+                print('Pos:', view.position, 'Sats:', view.numSats)
+                print("----------------")
 
                 # rg=vn._registerRead(reg_id) #AMIR
 
@@ -897,4 +934,4 @@ def main():
     vn.close()
 
 if __name__ == '__main__':
-    main()
+    imu_main(".")
