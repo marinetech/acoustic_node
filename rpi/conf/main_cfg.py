@@ -20,7 +20,7 @@ rpi_tasks = rpi_root + "/tasks"
 rpi_done = rpi_root + "/done"
 rpi_logs = rpi_root + "/logs"
 rpi_bin = rpi_root + "/bin"
-log_path = rpi_logs + "/main_" + now + ".log"
+log_path = rpi_logs + "/an_main_" + now + ".log"
 
 
 # modem related settings

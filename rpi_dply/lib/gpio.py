@@ -32,7 +32,7 @@ class CtrlGPIO:
 		GPIO.output(self.dsl_io, GPIO.HIGH)
 		GPIO.output(self.modem_io, GPIO.HIGH)
 		GPIO.output(self.battery_io, GPIO.HIGH)
-		time.sleep(5)
+		time.sleep(8)
 
 	# rpi, battery, dsl are on, modem is off
 	# used when rpi has to communicate with pc104
@@ -57,7 +57,17 @@ class CtrlGPIO:
 		GPIO.output(self.battery_io, GPIO.LOW)
 		GPIO.output(self.dsl_io, GPIO.LOW)
 		GPIO.output(self.modem_io, GPIO.LOW)
-		time.sleep(5)
+		time.sleep(8)
+
+	# for manual debugging
+	# io is an integer that represents io number, e.g. 10,22, etc
+	# on is a boolean - true means switch on
+	def switch_io(self, io, on):
+		if on:
+			GPIO.output(io, GPIO.LOW)
+		else:
+			GPIO.output(io, GPIO.HIGH)
+
 
 
 	def cleanup(self):

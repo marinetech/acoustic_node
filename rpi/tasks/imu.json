@@ -1,0 +1,5 @@
+{
+  "seconds_between_samples": 2,
+  "number_of_samples_each_file": 5,
+  "number_of_files": 2
+}

@@ -178,19 +178,11 @@ class SDM:
         # need to check that we didn't load an empty files
         if RxSig is None:
             exit(1)
-        self.log.print_log("-D- shape: " + str(RxSig.shape))
-        self.log.print_log("-I- start: pre_bb_norm")
+
         RxSig = matlab.pre_bb_norm(RxSig)
-        self.log.print_log("-I- done")
-        self.log.print_log("-I- start: convert2bb")
         RxSig_BB = matlab.convert2bb(RxSig, float(Fc), float(Fs), int(Factor), bLPF)
-        self.log.print_log("-I- done")
-        self.log.print_log("-I- start: normCorrC")
         mf = matlab.normCorrC(TxRef_BB, RxSig_BB)
-        self.log.print_log("-I- done")
-        self.log.print_log("-I- start: absolute")
         mf_vector_absolute = np.absolute(mf)
-        self.log.print_log("-I- done")
 
         # if detection copy all processing stages to detected folder; from there it will be sent to mainland
         self.log.print_log("-I- start: absolute")
@@ -214,7 +206,7 @@ class SDM:
             for src in [pre_bb_norm, bb_real, bb_imag, after_mf, mf_absolute]:
                 #dst = self.parsed_json["detected_folder"] + "/" + os.path.basename(src)
                 copyfile(src,  self.done_dir + "/" + basename )
-        copyfile(f,  self.done_dir + "/" + basename )
+        # copyfile(f,  self.done_dir + "/" + basename )
         self.log.print_log("-I- done")
 
 
@@ -222,7 +214,7 @@ class SDM:
         self.log.print_log("-I- processing tasks")
         for conf in glob.glob(self.tasks_dir + "/*.json"):
             self.load_conf(conf)
-            modemIP = "192.168.0." + self.parsed_json["modem"]
+            modemIP = "192.168.88." + self.parsed_json["modem"]
             self.check_ping(modemIP)
             self.check_dependencies()
             self.clean()

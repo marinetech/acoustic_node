@@ -689,14 +689,12 @@ class VectorNav(object):
             return json.dumps(self.dict)
 
 
-def imu_main(log_dir):
+def imu_main(log_dir, imu_conf_file):
     # if len(sys.argv) < 5:
     #     print('Usage: ')
     #     print(os.path.basename(__file__) + '<sync|async> <seconds_between_samples> <number_of_samples_each_file> <number_of_files> [com-port] [baud-rate]')
     #     print('Example: ' + os.path.basename(__file__) + ' sync 1 1 1')
     #     return
-    print("-D------ " + log_dir)
-
     port = None
     baud = VectorNav.DEFAULT_BAUD
 
@@ -705,10 +703,15 @@ def imu_main(log_dir):
     # number_of_samples_each_file = int(sys.argv[3])
     # number_of_files = int(sys.argv[4])
 
+    parsed_json = json.loads( open(imu_conf_file).read() )
+    for key in ["seconds_between_samples", "number_of_samples_each_file", "number_of_files"]:
+        if key not in parsed_json:
+            return None
+
     mode_str = "sync"
-    seconds_between_samples = 1
-    number_of_samples_each_file = 1
-    number_of_files = 1
+    seconds_between_samples = parsed_json["seconds_between_samples"]
+    number_of_samples_each_file = parsed_json["number_of_samples_each_file"]
+    number_of_files = parsed_json["number_of_files"]
 
     current_file_cnt=0
 
@@ -777,7 +780,7 @@ def imu_main(log_dir):
                 else :
                     current_file_cnt+=1
                 dt = datetime.today()
-                log_file_name=log_file_location+"/imu_"+dt.strftime("%Y_%m_%d_%H%M%S")+".log";
+                log_file_name=log_file_location+"/imu_"+dt.strftime("%Y_%m_%d_%H%M%S")+".csv";
 
             # ----------------------------------------
             #             need to get the accelaration data
@@ -933,5 +936,7 @@ def imu_main(log_dir):
 
     vn.close()
 
+    return(True)
+
 if __name__ == '__main__':
-    imu_main(".")
+    imu_main("/home/pi/acoustic_node/done", "/home/pi/acoustic_node/tasks/imu.json")

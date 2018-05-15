@@ -33,5 +33,5 @@ if [ -d "$dply_dir/bin/sdmsh.pi" ]; then
 fi
 
 
-ssh rpi 'rm -rf ~/acoustic_node_prev && mv ~/acoustic_node ~/acoustic_node_prev'
+ssh rpi 'rm -rf ~/prev_acoustic_node && mv ~/acoustic_node ~/prev_acoustic_node'
 scp -r $dply_dir rpi:~/acoustic_node

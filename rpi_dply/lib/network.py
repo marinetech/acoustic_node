@@ -37,6 +37,11 @@ class Network:
     # all files under remote_dir will be copied to local_dir (remote folders will be ignored)
     def ssh_get(self, remote_dir, local_dir):
         try:
+            #clean local dir
+            for f in os.listdir(local_dir):
+                if os.path.isfile(local_dir + "/" + f):
+                    os.remove(local_dir + "/" + f)
+
             sftp = self.ssh.open_sftp()
             self.log.print_log("-I- pulling new tasks from: " + remote_dir)
             for attr in sftp.listdir_attr(remote_dir):
