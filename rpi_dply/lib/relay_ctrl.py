@@ -9,5 +9,7 @@ if len(sys.argv) != 3:
     print(usage)
     exit()
 
+io =
+
 # ioctrl = CtrlGPIO("relay.log")
 # ioctrl.switch_io(10, True)

@@ -79,6 +79,11 @@ if  __name__ == "__main__":
     # gpio.set_comm_mode() # pwr-on rpi + dsl (turn-off modem)
     log.print_log("-I- uploading results")
     net.put_func(rpi_done, pc104_done) # upload results
+
+    #send "done-flag"
+    open(rpi_done + "/done.flg", 'w').close()
+    net.put_func(rpi_done, pc104_done) # upload results
+
     log.print_log("-I- done")
     os.remove(log_path)
     # gpio.set_process_mode() # rpi only
